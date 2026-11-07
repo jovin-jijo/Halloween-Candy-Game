@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,7 +14,7 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: radial-gradient(ellipse at 50% 40%, #302044 0%, #171020 55%, #0c0912 100%);
+            background: radial-gradient(ellipse at 50% 40%, #302044, #171020 55%, #0c0912);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -22,8 +23,55 @@
         }
 
         .game-shell {
-            width: min(100vw, 66.6667vh);
-            padding: 12px;
+            width: min(100%, 420px);
+            padding: 10px;
+        }
+
+        .audio-bar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 4px 9px;
+        }
+
+        .audio-bar button {
+            width: 29px;
+            height: 29px;
+            flex-shrink: 0;
+            border: 1px solid #574365;
+            border-radius: 50%;
+            background: #30223d;
+            color: #f5d5ad;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .audio-bar input {
+            width: min(95px, 25vw);
+            height: 4px;
+            appearance: none;
+            border-radius: 10px;
+            background: #594768;
+            cursor: pointer;
+        }
+
+        .audio-bar input::-webkit-slider-thumb {
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f1c69b;
+            border: 2px solid #30223d;
+        }
+
+        .audio-bar input::-moz-range-thumb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f1c69b;
+            border: 2px solid #30223d;
         }
 
         .game-wrap {
@@ -68,51 +116,6 @@
         #lyrics.show {
             opacity: 1;
             transform: translateY(0);
-        }
-
-        .audio-bar {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            padding: 0 5px 9px;
-        }
-
-        .audio-bar button {
-            width: 29px;
-            height: 29px;
-            border: 1px solid #574365;
-            border-radius: 50%;
-            background: #30223d;
-            color: #f5d5ad;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .audio-bar input {
-            width: 95px;
-            height: 4px;
-            appearance: none;
-            border-radius: 10px;
-            background: #594768;
-            cursor: pointer;
-        }
-
-        .audio-bar input::-webkit-slider-thumb {
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #f1c69b;
-            border: 2px solid #30223d;
-        }
-
-        .audio-bar input::-moz-range-thumb {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #f1c69b;
-            border: 2px solid #30223d;
         }
     </style>
 </head>
@@ -205,14 +208,13 @@ const lyrics = [
     { time: 174.78, text: "Too in love to be just friends 'cause" }
 ];
 
-
 let beats = [];
-let nextBeat = 0;
+let nextBeat = 1;
 
 fetch("./by%20my%20side%20(feat.%20bixby).json")
     .then(response => response.json())
     .then(data => {
-        beats = data.beats;
+        beats = data.downbeats;
     })
     .catch(error => console.error("Beat file could not load:", error));
 
@@ -275,7 +277,7 @@ function startGame() {
     if (started || gameOver) return;
 
     started = true;
-    nextBeat = 0;
+    nextBeat = 1;
     music.currentTime = 0;
 
     music.play().catch(function(error) {
@@ -298,7 +300,7 @@ function reset() {
     boostTimer = 0;
     flash = 0;
     won = false;
-    nextBeat = 0;
+    nextBeat = 1;
 
     lyricDisplay.textContent = "";
     lyricDisplay.classList.remove("show");
@@ -385,11 +387,8 @@ function updateLyrics() {
 }
 
 function updateBeats() {
-    while (
-        nextBeat < beats.length &&
-        music.currentTime >= beats[nextBeat]
-    ) {
-        flash = 0.25;
+    while (nextBeat < beats.length && music.currentTime >= beats[nextBeat]) {
+        flash = 0.22;
         nextBeat++;
     }
 }
@@ -452,7 +451,7 @@ function background() {
     ctx.fillRect(75, 225, 2, 2);
 
     if (flash > 0) {
-        ctx.fillStyle = "rgba(255, 221, 190," + flash * 0.07 + ")";
+        ctx.fillStyle = "rgba(190, 155, 230," + flash * 0.18 + ")";
         ctx.fillRect(0, 0, 160, 240);
     }
 }
@@ -610,7 +609,7 @@ function update(dt) {
     const boosted = boostTimer > 0;
 
     boostTimer = Math.max(0, boostTimer - dt);
-    flash = Math.max(0, flash - dt * 4);
+    flash = Math.max(0, flash - dt * 1.8);
 
     const moveSpeed = 150;
 
@@ -654,7 +653,7 @@ function update(dt) {
         ) {
             if (item.powerup) {
                 boostTimer = 6;
-                flash = 0.6;
+                flash = 0.25;
             } else if (item.poison) {
                 combo = 0;
                 misses++;
@@ -665,7 +664,7 @@ function update(dt) {
 
                 if (combo % 5 === 0) {
                     score += 5;
-                    flash = 0.4;
+                    flash = 0.18;
                 }
             }
 
