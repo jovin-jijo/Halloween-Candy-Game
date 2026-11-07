@@ -17,6 +17,7 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
 
         .game-wrap {
@@ -30,6 +31,32 @@
             height: auto;
             image-rendering: pixelated;
             border: 2px solid #332044;
+            touch-action: none;
+        }
+
+        .game-controls {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 5;
+        }
+
+        .game-controls button {
+            background: #332044;
+            color: white;
+            border: 1px solid #8b579e;
+            border-radius: 5px;
+            padding: 4px 7px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .game-controls input {
+            width: 65px;
+            accent-color: #ff9b35;
         }
 
         #lyrics {
@@ -39,14 +66,12 @@
             width: 90%;
             text-align: center;
             color: white;
-            font-family: Arial, Helvetica, sans-serif;
             font-size: clamp(12px, 3vw, 19px);
             font-weight: 600;
             line-height: 1.4;
-            text-shadow: 0 0 5px rgba(255,255,255,0.8),
-                         0 0 12px rgba(255,180,220,0.6);
+            text-shadow: 0 0 5px white, 0 0 12px rgba(255,180,220,0.6);
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.25s ease;
             pointer-events: none;
         }
 
@@ -60,6 +85,11 @@
 <div class="game-wrap">
     <canvas id="game" width="160" height="240"></canvas>
     <div id="lyrics"></div>
+
+    <div class="game-controls">
+        <button id="muteBtn">🔊</button>
+        <input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.5">
+    </div>
 </div>
 
 <audio id="music" preload="auto">
@@ -71,6 +101,8 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const music = document.getElementById("music");
 const lyricDisplay = document.getElementById("lyrics");
+const volumeSlider = document.getElementById("volumeSlider");
+const muteBtn = document.getElementById("muteBtn");
 
 const lyrics = [
     { time: 4.86, text: "I think I died again" },
@@ -132,28 +164,51 @@ const lyrics = [
     { time: 168.70, text: "You've been always on my mind" },
     { time: 171.74, text: "You've been always by my side" },
     { time: 174.09, text: "Again, again" },
-    { time: 174.78, text: "Too in love to be just friends 'cause" }
+    { time: 174.78, text: "Too in love to be just friends 'cause"
 ];
 
 let player = 68;
 let score = 0;
 let misses = 0;
+let combo = 0;
+let bestCombo = 0;
 let items = [];
 let gameOver = false;
-let keys = {};
 let started = false;
 let currentLyric = -1;
+let elapsed = 0;
+let spawnTimer = 0;
+let boostTimer = 0;
+let lastFrame = 0;
+let flash = 0;
+let won = false;
+
+const GAME_LENGTH = 60;
+const MAX_MISSES = 20;
+
+music.volume = 0.5;
+
+volumeSlider.addEventListener("input", function() {
+    music.volume = Number(this.value);
+    music.muted = false;
+    muteBtn.textContent = music.volume === 0 ? "🔇" : "🔊";
+});
+
+muteBtn.addEventListener("click", function() {
+    music.muted = !music.muted;
+    this.textContent = music.muted ? "🔇" : "🔊";
+});
 
 music.addEventListener("error", function() {
     console.error("Audio could not load. Check the MP3 filename and location.");
 });
 
-music.addEventListener("playing", function() {
-    console.log("Music is playing!");
-});
-
 window.onkeydown = function(e) {
     keys[e.key] = true;
+
+    if (e.key === " " || e.key.startsWith("Arrow")) {
+        e.preventDefault();
+    }
 
     if (e.key === " " && !started && !gameOver) {
         startGame();
@@ -170,11 +225,10 @@ function startGame() {
     if (started || gameOver) return;
 
     started = true;
+    music.currentTime = 0;
 
     music.play().catch(function(error) {
         console.error("Audio playback error:", error);
-        lyricDisplay.textContent = "Music could not load";
-        lyricDisplay.classList.add("show");
     });
 }
 
@@ -182,10 +236,17 @@ function reset() {
     player = 68;
     score = 0;
     misses = 0;
+    combo = 0;
+    bestCombo = 0;
     items = [];
     gameOver = false;
     started = false;
     currentLyric = -1;
+    elapsed = 0;
+    spawnTimer = 0;
+    boostTimer = 0;
+    flash = 0;
+    won = false;
 
     lyricDisplay.textContent = "";
     lyricDisplay.classList.remove("show");
@@ -204,10 +265,42 @@ canvas.onclick = function() {
     }
 };
 
+canvas.addEventListener("pointermove", function(e) {
+    if (!started || gameOver) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scale = canvas.width / rect.width;
+    const x = (e.clientX - rect.left) * scale;
+
+    player = Math.max(0, Math.min(136, x - 12));
+});
+
 music.onended = function() {
-    gameOver = true;
-    lyricDisplay.classList.remove("show");
+    if (!gameOver) finishGame(elapsed >= GAME_LENGTH);
 };
+
+function finishGame(completed) {
+    gameOver = true;
+    won = completed;
+    music.pause();
+    lyricDisplay.classList.remove("show");
+}
+
+function spawnCandy() {
+    const powerup = Math.random() < 0.035;
+    const poison = !powerup && Math.random() < 0.12;
+
+    items.push({
+        x: Math.random() * 148,
+        y: -10,
+        color: powerup ? "#ffd700" : poison ? "#9922ee" :
+            ["#ff2255", "#ffaa00", "#00cc55"][
+                Math.floor(Math.random() * 3)
+            ],
+        poison: poison,
+        powerup: powerup
+    });
+}
 
 function updateLyrics() {
     let index = -1;
@@ -230,11 +323,17 @@ function updateLyrics() {
             requestAnimationFrame(() => {
                 lyricDisplay.classList.add("show");
             });
+
+            spawnCandy();
+            flash = 0.35;
+            return true;
         } else {
             lyricDisplay.classList.remove("show");
             lyricDisplay.textContent = "";
         }
     }
+
+    return false;
 }
 
 function background() {
@@ -262,6 +361,11 @@ function background() {
     ctx.fillRect(20, 145, 20, 20);
     ctx.fillRect(85, 192, 6, 8);
     ctx.fillRect(125, 190, 7, 10);
+
+    if (flash > 0) {
+        ctx.fillStyle = "rgba(255,255,255," + flash * 0.18 + ")";
+        ctx.fillRect(0, 0, 160, 240);
+    }
 }
 
 function drawPlayer() {
@@ -281,6 +385,16 @@ function drawPlayer() {
 }
 
 function drawItem(item) {
+    if (item.powerup) {
+        ctx.fillStyle = "#ffd700";
+        ctx.fillRect(item.x, item.y, 10, 8);
+
+        ctx.fillStyle = "#442500";
+        ctx.font = "6px monospace";
+        ctx.fillText("2X", item.x + 1, item.y + 6);
+        return;
+    }
+
     ctx.fillStyle = item.color;
     ctx.fillRect(item.x + 2, item.y + 2, 4, 4);
 
@@ -289,47 +403,94 @@ function drawItem(item) {
     ctx.fillRect(item.x + 6, item.y + 3, 2, 2);
 }
 
-function update() {
+function update(dt) {
     if (gameOver || !started) return;
 
-    if (keys["ArrowLeft"] || keys["a"]) player -= 3;
-    if (keys["ArrowRight"] || keys["d"]) player += 3;
+    elapsed += dt;
 
-    if (player < 0) player = 0;
-    if (player > 136) player = 136;
-
-    if (Math.random() < 0.035) {
-        let poison = Math.random() < 0.08;
-
-        items.push({
-            x: Math.random() * 152,
-            y: -8,
-            color: poison ? "#9922ee" :
-                ["#ff2255", "#ffaa00", "#00cc55"][
-                    Math.floor(Math.random() * 3)
-                ],
-            poison: poison
-        });
+    if (elapsed >= GAME_LENGTH) {
+        elapsed = GAME_LENGTH;
+        finishGame(true);
+        return;
     }
+
+    const difficulty = Math.min(elapsed / GAME_LENGTH, 1);
+    const boosted = boostTimer > 0;
+
+    boostTimer = Math.max(0, boostTimer - dt);
+    flash = Math.max(0, flash - dt);
+
+    const moveSpeed = 150;
+
+    if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
+        player -= moveSpeed * dt;
+    }
+
+    if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
+        player += moveSpeed * dt;
+    }
+
+    player = Math.max(0, Math.min(136, player));
+
+    const spawnInterval = Math.max(
+        0.32,
+        0.95 - difficulty * 0.52 - (boosted ? 0.18 : 0)
+    );
+
+    spawnTimer += dt;
+
+    while (spawnTimer >= spawnInterval) {
+        spawnTimer -= spawnInterval;
+        spawnCandy();
+
+        if (difficulty > 0.55 && Math.random() < 0.25) {
+            spawnCandy();
+        }
+    }
+
+    const fallSpeed = 48 + difficulty * 48;
 
     for (let i = items.length - 1; i >= 0; i--) {
         let item = items[i];
 
-        item.y += 1.0;
+        item.y += fallSpeed * (boosted ? 1.15 : 1) * dt;
 
         if (
             item.y >= 200 &&
-            item.x + 8 >= player &&
+            item.x + 10 >= player &&
             item.x <= player + 24
         ) {
-            if (!item.poison) {
-                score++;
+            if (item.powerup) {
+                boostTimer = 6;
+                flash = 0.6;
+            } else if (item.poison) {
+                combo = 0;
+                misses++;
+            } else {
+                combo++;
+                bestCombo = Math.max(bestCombo, combo);
+
+                score += boosted ? 2 : 1;
+
+                if (combo % 5 === 0) {
+                    score += 5;
+                    flash = 0.4;
+                }
             }
 
             items.splice(i, 1);
         } else if (item.y > 240) {
-            if (!item.poison) misses++;
+            if (!item.poison && !item.powerup) {
+                misses++;
+                combo = 0;
+            }
+
             items.splice(i, 1);
+        }
+
+        if (misses >= MAX_MISSES) {
+            finishGame(false);
+            break;
         }
     }
 }
@@ -344,37 +505,67 @@ function draw() {
     drawPlayer();
 
     ctx.fillStyle = "white";
-    ctx.font = "9px monospace";
-    ctx.fillText("SCORE: " + score, 4, 12);
-    ctx.fillText("MISSES: " + misses, 100, 12);
+    ctx.font = "8px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText("SCORE " + score, 4, 12);
+    ctx.fillText("MISSES " + misses + "/" + MAX_MISSES, 94, 12);
+
+    ctx.fillStyle = "#332044";
+    ctx.fillRect(4, 17, 152, 3);
+
+    ctx.fillStyle = "#ff9b35";
+    ctx.fillRect(4, 17, 152 * (elapsed / GAME_LENGTH), 3);
+
+    ctx.fillStyle = "#ffd700";
+    ctx.fillText("COMBO " + combo, 4, 31);
+
+    ctx.fillStyle = "white";
+    ctx.fillText("TIME " + Math.ceil(GAME_LENGTH - elapsed), 112, 31);
+
+    if (boostTimer > 0) {
+        ctx.fillStyle = "#ffd700";
+        ctx.fillText("2X ACTIVE!", 54, 43);
+    }
 
     if (!started && !gameOver) {
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
-        ctx.fillText("CLICK TO START", 80, 120);
+        ctx.font = "bold 11px monospace";
+        ctx.fillText("CANDY CATCH", 80, 105);
+        ctx.font = "8px monospace";
+        ctx.fillText("CLICK OR SPACE TO START", 80, 123);
+        ctx.fillText("ARROWS / A-D TO MOVE", 80, 137);
         ctx.textAlign = "left";
     }
 
     if (gameOver) {
-        ctx.fillStyle = "rgba(8,3,15,0.85)";
+        ctx.fillStyle = "rgba(8,3,15,0.88)";
         ctx.fillRect(0, 0, 160, 240);
 
-        ctx.fillStyle = "#ff2255";
-        ctx.font = "bold 14px monospace";
         ctx.textAlign = "center";
-        ctx.fillText("GAME OVER", 80, 100);
+
+        ctx.fillStyle = won ? "#ffd700" : "#ff2255";
+        ctx.font = "bold 15px monospace";
+        ctx.fillText(won ? "LEVEL CLEAR!" : "GAME OVER", 80, 85);
 
         ctx.fillStyle = "white";
         ctx.font = "9px monospace";
-        ctx.fillText("Score: " + score, 80, 125);
-        ctx.fillText("SPACE TO RESTART", 80, 150);
+        ctx.fillText("SCORE: " + score, 80, 112);
+        ctx.fillText("BEST COMBO: " + bestCombo, 80, 129);
+        ctx.fillText("MISSES: " + misses, 80, 146);
+        ctx.fillText("CLICK OR SPACE TO RESTART", 80, 174);
 
         ctx.textAlign = "left";
     }
 }
 
-function game() {
-    update();
+function game(timestamp) {
+    if (!lastFrame) lastFrame = timestamp;
+
+    const dt = Math.min((timestamp - lastFrame) / 1000, 0.05);
+    lastFrame = timestamp;
+
+    update(dt);
 
     if (started && !gameOver) {
         updateLyrics();
