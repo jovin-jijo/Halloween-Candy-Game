@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -256,14 +257,29 @@ function background() {
 }
 
 function drawPlayer() {
-    ctx.fillStyle = "#6d432f";
-    ctx.fillRect(player + 3, 210, 18, 9);
+    // Pumpkin stem
+    ctx.fillStyle = "#526b43";
+    ctx.fillRect(player + 10, 203, 5, 5);
+    ctx.fillRect(player + 11, 201, 3, 3);
 
-    ctx.fillStyle = "#e98c61";
-    ctx.fillRect(player + 5, 211, 14, 6);
+    // Pumpkin body
+    ctx.fillStyle = "#b85b32";
+    ctx.fillRect(player + 4, 207, 16, 13);
 
-    ctx.fillStyle = "#f4b17c";
-    ctx.fillRect(player + 7, 211, 10, 2);
+    ctx.fillStyle = "#e9873f";
+    ctx.fillRect(player + 2, 210, 20, 8);
+    ctx.fillRect(player + 5, 206, 14, 15);
+
+    // Pumpkin sides and ridges
+    ctx.fillStyle = "#f5a34f";
+    ctx.fillRect(player + 8, 207, 2, 13);
+    ctx.fillRect(player + 14, 207, 2, 13);
+
+    // Pumpkin face
+    ctx.fillStyle = "#573044";
+    ctx.fillRect(player + 7, 212, 3, 3);
+    ctx.fillRect(player + 15, 212, 3, 3);
+    ctx.fillRect(player + 10, 217, 5, 2);
 }
 
 function drawItem(item) {
