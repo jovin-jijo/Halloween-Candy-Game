@@ -1,15 +1,11 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Halloween Candy Catch</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
-
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -29,7 +25,6 @@
 
         .game-wrap {
             position: relative;
-            overflow: hidden;
         }
 
         canvas {
@@ -43,29 +38,19 @@
         #lyrics {
             position: absolute;
             bottom: 17%;
-            left: 6%;
-            width: 88%;
-            padding: 7px 5px;
+            left: 5%;
+            width: 90%;
             color: white;
             text-align: center;
             font-family: "Chewy", cursive;
             font-size: clamp(15px, 3.5vw, 21px);
-            line-height: 1.3;
-            text-shadow:
-                0 0 3px #fff,
-                0 0 8px rgba(255, 255, 255, 0.9),
-                0 0 17px rgba(221, 190, 255, 0.8),
-                0 0 28px rgba(221, 190, 255, 0.5);
+            text-shadow: 0 0 5px white, 0 0 15px #dcbcff;
             opacity: 0;
-            transform: translateY(5px);
-            transition: opacity 0.25s, transform 0.25s;
+            transition: opacity 0.25s;
             pointer-events: none;
         }
 
-        #lyrics.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        #lyrics.show { opacity: 1; }
     </style>
 </head>
 <body>
@@ -88,163 +73,101 @@ const music = document.getElementById("music");
 const lyricDisplay = document.getElementById("lyrics");
 
 const lyrics = [
-    { time: 4.86, text: "I think I died again" },
-    { time: 7.89, text: "So we could stay as friends, yeah" },
-    { time: 11.07, text: "I think it all depends" },
-    { time: 13.47, text: "On the truth" },
-    { time: 17.30, text: "I know your friends just hate me" },
-    { time: 20.28, text: "They acting kind of crazy" },
-    { time: 22.03, text: "They always laugh and gate-keep" },
-    { time: 25.76, text: "But it's cool" },
-    { time: 28.30, text: "People, they always quick to judge" },
-    { time: 31.22, text: "We know, I'm never leaving ya" },
-    { time: 34.06, text: "Bedroom is a haven" },
-    { time: 35.62, text: "We put on our favorite song" },
-    { time: 40.65, text: "Details, the ones I'll never know" },
-    { time: 44.32, text: "She sells the things I'm letting go" },
-    { time: 46.46, text: "But, way to push my luck" },
-    { time: 48.86, text: "I've been alive when you talk like you do" },
-    { time: 51.50, text: "I could cry" },
-    { time: 54.31, text: "Every time I'm asking why" },
-    { time: 57.19, text: "You've been always by my side" },
-    { time: 59.51, text: "Again, again" },
-    { time: 60.23, text: "Too in love to be just friends 'cause" },
-    { time: 64.53, text: "I won't lie" },
-    { time: 66.51, text: "You've been always on my mind" },
-    { time: 69.56, text: "You've been always by my side" },
-    { time: 71.86, text: "Again, again" },
-    { time: 72.78, text: "Too in love to be just friends 'cause" },
-    { time: 77.08, text: "Your hearts grown weak" },
-    { time: 78.62, text: "Enough to keep me your dirty little secret" },
-    { time: 83.01, text: "When you last saw me, baby I couldn't speak" },
-    { time: 86.37, text: "Oh, you'd never really mean that" },
-    { time: 88.97, text: "Oh, when you're far from me" },
-    { time: 90.85, text: "It becomes so easy to figure it out" },
-    { time: 93.83, text: "So, fine" },
-    { time: 94.71, text: "I know your waiting for" },
-    { time: 96.72, text: "I don't wanna fall" },
-    { time: 97.36, text: "Oh baby you're the one for me" },
-    { time: 101.98, text: "I could cry" },
-    { time: 103.84, text: "Every time I'm asking why" },
-    { time: 106.72, text: "You've been always by my side" },
-    { time: 109.04, text: "Again, again" },
-    { time: 109.78, text: "Too in love to be just friends 'cause" },
-    { time: 114.05, text: "I won't lie" },
-    { time: 116.07, text: "You've been always on my mind" },
-    { time: 119.11, text: "You've been always by my side" },
-    { time: 121.43, text: "Again, again" },
-    { time: 122.17, text: "Too in love to be just friends 'cause" },
-    { time: 138.56, text: "(Yeah my hearts got weak I know)" },
-    { time: 141.61, text: "(Saying I should let things go)" },
-    { time: 144.52, text: "(But my time)" },
-    { time: 145.07, text: "(Got me crying)" },
-    { time: 154.47, text: "I could cry" },
-    { time: 155.59, text: "Every time I'm asking why" },
-    { time: 159.38, text: "You've been always by my side" },
-    { time: 161.60, text: "Again, again" },
-    { time: 162.60, text: "Too in love to be just friends 'cause" },
-    { time: 166.58, text: "I won't lie" },
-    { time: 168.70, text: "You've been always on my mind" },
-    { time: 171.74, text: "You've been always by my side" },
-    { time: 174.09, text: "Again, again" },
-    { time: 174.78, text: "Too in love to be just friends 'cause" }
+    [4.86, "I think I died again"],
+    [7.89, "So we could stay as friends, yeah"],
+    [11.07, "I think it all depends"],
+    [13.47, "On the truth"],
+    [17.30, "I know your friends just hate me"],
+    [20.28, "They acting kind of crazy"],
+    [22.03, "They always laugh and gate-keep"],
+    [25.76, "But it's cool"],
+    [28.30, "People, they always quick to judge"],
+    [31.22, "We know, I'm never leaving ya"],
+    [34.06, "Bedroom is a haven"],
+    [35.62, "We put on our favorite song"],
+    [40.65, "Details, the ones I'll never know"],
+    [44.32, "She sells the things I'm letting go"],
+    [46.46, "But, way to push my luck"],
+    [48.86, "I've been alive when you talk like you do"],
+    [51.50, "I could cry"],
+    [54.31, "Every time I'm asking why"],
+    [57.19, "You've been always by my side"],
+    [59.51, "Again, again"],
+    [60.23, "Too in love to be just friends 'cause"],
+    [64.53, "I won't lie"],
+    [66.51, "You've been always on my mind"],
+    [69.56, "You've been always by my side"],
+    [71.86, "Again, again"],
+    [72.78, "Too in love to be just friends 'cause"],
+    [77.08, "Your hearts grown weak"],
+    [78.62, "Enough to keep me your dirty little secret"],
+    [83.01, "When you last saw me, baby I couldn't speak"],
+    [86.37, "Oh, you'd never really mean that"],
+    [88.97, "Oh, when you're far from me"],
+    [90.85, "It becomes so easy to figure it out"],
+    [93.83, "So, fine"],
+    [94.71, "I know your waiting for"],
+    [96.72, "I don't wanna fall"],
+    [97.36, "Oh baby you're the one for me"],
+    [101.98, "I could cry"],
+    [103.84, "Every time I'm asking why"],
+    [106.72, "You've been always by my side"],
+    [109.04, "Again, again"],
+    [109.78, "Too in love to be just friends 'cause"],
+    [114.05, "I won't lie"],
+    [116.07, "You've been always on my mind"],
+    [119.11, "You've been always by my side"],
+    [121.43, "Again, again"],
+    [122.17, "Too in love to be just friends 'cause"],
+    [138.56, "(Yeah my hearts got weak I know)"],
+    [141.61, "(Saying I should let things go)"],
+    [144.52, "(But my time)"],
+    [145.07, "(Got me crying)"],
+    [154.47, "I could cry"],
+    [155.59, "Every time I'm asking why"],
+    [159.38, "You've been always by my side"],
+    [161.60, "Again, again"],
+    [162.60, "Too in love to be just friends 'cause"],
+    [166.58, "I won't lie"],
+    [168.70, "You've been always on my mind"],
+    [171.74, "You've been always by my side"],
+    [174.09, "Again, again"],
+    [174.78, "Too in love to be just friends 'cause"]
 ];
-
-let player = 68;
-let score = 0;
-let misses = 0;
-let keys = {};
-let combo = 0;
-let bestCombo = 0;
-let items = [];
-let gameOver = false;
-let started = false;
-let currentLyric = -1;
-let elapsed = 0;
-let spawnTimer = 0;
-let boostTimer = 0;
-let lastFrame = 0;
-let won = false;
 
 const GAME_LENGTH = 60;
 const MAX_MISSES = 20;
 
+let player = 68, score = 0, misses = 0;
+let combo = 0, bestCombo = 0;
+let items = [], keys = {};
+let started = false, gameOver = false, won = false;
+let elapsed = 0, spawnTimer = 0, boostTimer = 0;
+let currentLyric = -1, lastFrame = 0;
+
 music.volume = 0.5;
-
-window.onkeydown = function(e) {
-    keys[e.key] = true;
-
-    if (e.key === " " || e.key.startsWith("Arrow")) {
-        e.preventDefault();
-    }
-
-    if (e.key === " " && !started && !gameOver) {
-        startGame();
-    } else if (gameOver && e.key === " ") {
-        reset();
-    }
-};
-
-window.onkeyup = function(e) {
-    keys[e.key] = false;
-};
 
 function startGame() {
     if (started || gameOver) return;
-
     started = true;
     music.currentTime = 0;
-
-    music.play().catch(function(error) {
-        console.error("Audio playback error:", error);
-    });
+    music.play().catch(() => {});
 }
 
 function reset() {
     player = 68;
-    score = 0;
-    misses = 0;
-    combo = 0;
-    bestCombo = 0;
+    score = misses = combo = bestCombo = 0;
     items = [];
-    gameOver = false;
-    started = false;
+    elapsed = spawnTimer = boostTimer = 0;
     currentLyric = -1;
-    elapsed = 0;
-    spawnTimer = 0;
-    boostTimer = 0;
-    won = false;
-
+    started = false;
+    gameOver = won = false;
     lyricDisplay.textContent = "";
     lyricDisplay.classList.remove("show");
-
     music.pause();
     music.currentTime = 0;
-
     startGame();
 }
-
-canvas.onclick = function() {
-    if (gameOver) {
-        reset();
-    } else if (!started) {
-        startGame();
-    }
-};
-
-canvas.addEventListener("pointermove", function(e) {
-    if (!started || gameOver) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const scale = canvas.width / rect.width;
-    const x = (e.clientX - rect.left) * scale;
-
-    player = Math.max(0, Math.min(136, x - 12));
-});
-
-music.onended = function() {
-    if (!gameOver) finishGame(elapsed >= GAME_LENGTH);
-};
 
 function finishGame(completed) {
     gameOver = true;
@@ -253,19 +176,41 @@ function finishGame(completed) {
     lyricDisplay.classList.remove("show");
 }
 
+window.onkeydown = e => {
+    keys[e.key] = true;
+    if (e.key === " " || e.key.startsWith("Arrow")) e.preventDefault();
+    if (e.key === " " && !started && !gameOver) startGame();
+    else if (e.key === " " && gameOver) reset();
+};
+
+window.onkeyup = e => keys[e.key] = false;
+
+canvas.onclick = () => {
+    if (gameOver) reset();
+    else if (!started) startGame();
+};
+
+canvas.onpointermove = e => {
+    if (!started || gameOver) return;
+    const rect = canvas.getBoundingClientRect();
+    player = Math.max(0, Math.min(136, (e.clientX - rect.left) * 160 / rect.width - 12));
+};
+
+music.onended = () => {
+    if (!gameOver) finishGame(elapsed >= GAME_LENGTH);
+};
+
 function spawnCandy() {
     const powerup = Math.random() < 0.035;
     const poison = !powerup && Math.random() < 0.12;
+    const colors = ["#e98c86", "#e9ad67", "#91bba0"];
 
     items.push({
         x: Math.random() * 148,
         y: -10,
-        color: powerup ? "#f6ce76" : poison ? "#a77bd1" :
-            ["#e98c86", "#e9ad67", "#91bba0"][
-                Math.floor(Math.random() * 3)
-            ],
-        poison: poison,
-        powerup: powerup
+        color: powerup ? "#f6ce76" : poison ? "#a77bd1" : colors[Math.floor(Math.random() * 3)],
+        powerup,
+        poison
     });
 }
 
@@ -273,132 +218,67 @@ function updateLyrics() {
     let index = -1;
 
     for (let i = 0; i < lyrics.length; i++) {
-        if (music.currentTime >= lyrics[i].time) {
-            index = i;
-        } else {
-            break;
-        }
+        if (music.currentTime >= lyrics[i][0]) index = i;
+        else break;
     }
 
     if (index !== currentLyric) {
         currentLyric = index;
-
-        if (index >= 0) {
-            lyricDisplay.classList.remove("show");
-            lyricDisplay.textContent = lyrics[index].text;
-
-            requestAnimationFrame(() => {
-                lyricDisplay.classList.add("show");
-            });
-
-            spawnCandy();
-        } else {
-            lyricDisplay.classList.remove("show");
-            lyricDisplay.textContent = "";
-        }
+        lyricDisplay.textContent = index >= 0 ? lyrics[index][1] : "";
+        lyricDisplay.classList.toggle("show", index >= 0);
+        if (index >= 0) spawnCandy();
     }
 }
 
 function background() {
-    const g = ctx.createLinearGradient(0, 0, 0, 240);
-    g.addColorStop(0, "#21172f");
-    g.addColorStop(0.55, "#49334f");
-    g.addColorStop(1, "#765064");
-
-    ctx.fillStyle = g;
+    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+    gradient.addColorStop(0, "#21172f");
+    gradient.addColorStop(1, "#765064");
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 160, 240);
 
-    ctx.fillStyle = "rgba(255, 222, 185, 0.08)";
-    ctx.fillRect(0, 45, 160, 1);
-
     ctx.fillStyle = "#f3c58d";
-    ctx.fillRect(122, 49, 16, 16);
-    ctx.fillRect(126, 45, 8, 24);
-    ctx.fillRect(118, 53, 24, 8);
-
-    ctx.fillStyle = "#fff0d9";
-    ctx.fillRect(126, 53, 8, 8);
-
-    ctx.fillStyle = "#e8d8e9";
-    const stars = [
-        [14, 48], [38, 68], [70, 42], [99, 78],
-        [19, 112], [58, 91], [146, 96], [86, 120],
-        [11, 145], [132, 132], [45, 154]
-    ];
-
-    for (const star of stars) {
-        ctx.fillRect(star[0], star[1], 1, 1);
-    }
-
-    ctx.fillStyle = "#39283e";
-    ctx.fillRect(0, 174, 160, 66);
-    ctx.fillRect(7, 154, 29, 20);
-    ctx.fillRect(12, 140, 19, 14);
-    ctx.fillRect(47, 164, 22, 10);
-    ctx.fillRect(105, 158, 24, 16);
-    ctx.fillRect(111, 143, 12, 15);
-    ctx.fillRect(137, 166, 23, 8);
-
-    ctx.fillStyle = "#574052";
-    ctx.fillRect(15, 160, 3, 4);
-    ctx.fillRect(25, 160, 3, 4);
-    ctx.fillRect(113, 151, 3, 4);
-    ctx.fillRect(119, 151, 3, 4);
+    ctx.fillRect(124, 49, 14, 14);
 
     ctx.fillStyle = "#21172b";
-    ctx.fillRect(0, 200, 160, 40);
+    ctx.fillRect(0, 180, 160, 60);
 
-    ctx.fillStyle = "#503649";
-    ctx.fillRect(0, 198, 160, 2);
+    ctx.fillStyle = "#39283e";
+    ctx.fillRect(8, 157, 28, 23);
+    ctx.fillRect(47, 164, 22, 16);
+    ctx.fillRect(105, 153, 25, 27);
+    ctx.fillRect(137, 165, 23, 15);
 
-    ctx.fillStyle = "#d18d73";
-    ctx.fillRect(17, 205, 2, 2);
-    ctx.fillRect(140, 215, 2, 2);
-    ctx.fillRect(75, 225, 2, 2);
+    ctx.fillStyle = "#e8d8e9";
+    [[14,48],[38,68],[70,42],[99,78],[19,112],[58,91],[146,96],[86,120],[132,132]].forEach(p => {
+        ctx.fillRect(p[0], p[1], 2, 2);
+    });
 }
 
 function drawPlayer() {
-    ctx.fillStyle = "#a94e3e";
-    ctx.fillRect(player + 2, 211, 20, 9);
+    ctx.fillStyle = "#6d432f";
+    ctx.fillRect(player + 3, 210, 18, 9);
 
     ctx.fillStyle = "#e98c61";
-    ctx.fillRect(player + 4, 210, 16, 9);
+    ctx.fillRect(player + 5, 211, 14, 6);
 
     ctx.fillStyle = "#f4b17c";
     ctx.fillRect(player + 7, 211, 10, 2);
-
-    ctx.fillStyle = "#38202c";
-    ctx.fillRect(player + 7, 214, 3, 2);
-    ctx.fillRect(player + 15, 214, 3, 2);
-    ctx.fillRect(player + 9, 218, 7, 2);
-
-    ctx.fillStyle = "#6d432f";
-    ctx.fillRect(player + 11, 207, 2, 4);
-
-    ctx.fillStyle = "#b6c69a";
-    ctx.fillRect(player + 12, 206, 3, 2);
 }
 
 function drawItem(item) {
-    if (item.powerup) {
-        ctx.fillStyle = "#f6ce76";
-        ctx.fillRect(item.x, item.y, 10, 8);
+    ctx.fillStyle = item.color;
+    ctx.fillRect(item.x + 2, item.y + 1, 6, 6);
 
+    if (item.powerup) {
         ctx.fillStyle = "#75502f";
         ctx.font = "6px monospace";
-        ctx.fillText("2X", item.x + 1, item.y + 6);
-        return;
+        ctx.fillText("2X", item.x, item.y + 6);
+    } else {
+        ctx.fillStyle = "#f8d9c5";
+        ctx.fillRect(item.x, item.y + 3, 2, 2);
+        ctx.fillRect(item.x + 8, item.y + 3, 2, 2);
     }
-
-    ctx.fillStyle = item.color;
-    ctx.fillRect(item.x + 2, item.y + 1, 5, 6);
-
-    ctx.fillStyle = "#f8d9c5";
-    ctx.fillRect(item.x, item.y + 3, 2, 2);
-    ctx.fillRect(item.x + 7, item.y + 3, 2, 2);
-
-    ctx.fillStyle = "rgba(255,255,255,0.45)";
-    ctx.fillRect(item.x + 3, item.y + 2, 2, 1);
 }
 
 function drawHUD() {
@@ -413,11 +293,10 @@ function drawHUD() {
     ctx.textAlign = "right";
     ctx.fillText("MISS " + misses + "/" + MAX_MISSES, 153, 12);
 
-    ctx.fillStyle = "rgba(255,255,255,0.16)";
+    ctx.fillStyle = "#ffffff33";
     ctx.fillRect(7, 18, 146, 2);
-
     ctx.fillStyle = "#e9a477";
-    ctx.fillRect(7, 18, 146 * (elapsed / GAME_LENGTH), 2);
+    ctx.fillRect(7, 18, 146 * elapsed / GAME_LENGTH, 2);
 
     if (combo >= 2) {
         ctx.textAlign = "left";
@@ -435,144 +314,103 @@ function drawHUD() {
 }
 
 function drawStartScreen() {
-    ctx.fillStyle = "rgba(25, 16, 34, 0.72)";
+    ctx.fillStyle = "#191022cc";
     ctx.fillRect(12, 82, 136, 77);
 
-    ctx.fillStyle = "#f1c69b";
     ctx.textAlign = "center";
+    ctx.fillStyle = "#f1c69b";
     ctx.font = "bold 12px monospace";
     ctx.fillText("CANDY CATCH", 80, 105);
 
-    ctx.fillStyle = "#e9b4a4";
     ctx.font = "7px monospace";
+    ctx.fillStyle = "#e9b4a4";
     ctx.fillText("A LITTLE HALLOWEEN GAME", 80, 118);
-
     ctx.fillStyle = "#f5e5d5";
     ctx.fillText("CLICK TO START", 80, 139);
     ctx.fillText("ARROWS / A-D TO MOVE", 80, 150);
-
     ctx.textAlign = "left";
 }
 
 function drawGameOver() {
-    ctx.fillStyle = "rgba(19, 12, 27, 0.91)";
+    ctx.fillStyle = "#130c1be8";
     ctx.fillRect(0, 0, 160, 240);
 
     ctx.textAlign = "center";
-
     ctx.fillStyle = won ? "#f6ce76" : "#e99a91";
     ctx.font = "bold 14px monospace";
     ctx.fillText(won ? "LEVEL CLEAR!" : "GAME OVER", 80, 84);
 
     ctx.fillStyle = "#f5e5d5";
     ctx.font = "8px monospace";
-    ctx.fillText("SCORE  " + score, 80, 111);
-    ctx.fillText("BEST COMBO  " + bestCombo, 80, 127);
-    ctx.fillText("MISSES  " + misses, 80, 143);
+    ctx.fillText("SCORE " + score, 80, 111);
+    ctx.fillText("BEST COMBO " + bestCombo, 80, 127);
+    ctx.fillText("MISSES " + misses, 80, 143);
 
     ctx.fillStyle = "#e9b4a4";
     ctx.fillText("CLICK TO PLAY AGAIN", 80, 174);
-
     ctx.textAlign = "left";
 }
 
 function draw() {
     background();
-
-    for (const item of items) {
-        drawItem(item);
-    }
-
+    items.forEach(drawItem);
     drawPlayer();
     drawHUD();
 
-    if (!started && !gameOver) {
-        drawStartScreen();
-    }
-
-    if (gameOver) {
-        drawGameOver();
-    }
+    if (!started && !gameOver) drawStartScreen();
+    if (gameOver) drawGameOver();
 }
 
 function update(dt) {
-    if (gameOver || !started) return;
+    if (!started || gameOver) return;
 
     elapsed += dt;
-
     if (elapsed >= GAME_LENGTH) {
         elapsed = GAME_LENGTH;
         finishGame(true);
         return;
     }
 
-    const difficulty = Math.min(elapsed / GAME_LENGTH, 1);
+    const difficulty = elapsed / GAME_LENGTH;
     const boosted = boostTimer > 0;
-
     boostTimer = Math.max(0, boostTimer - dt);
 
-    const moveSpeed = 150;
-
-    if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
-        player -= moveSpeed * dt;
-    }
-
-    if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
-        player += moveSpeed * dt;
-    }
-
+    if (keys.ArrowLeft || keys.a || keys.A) player -= 150 * dt;
+    if (keys.ArrowRight || keys.d || keys.D) player += 150 * dt;
     player = Math.max(0, Math.min(136, player));
 
-    const spawnInterval = Math.max(
-        0.32,
-        0.95 - difficulty * 0.52 - (boosted ? 0.18 : 0)
-    );
-
+    const interval = Math.max(0.32, 0.95 - difficulty * 0.52 - (boosted ? 0.18 : 0));
     spawnTimer += dt;
 
-    while (spawnTimer >= spawnInterval) {
-        spawnTimer -= spawnInterval;
+    while (spawnTimer >= interval) {
+        spawnTimer -= interval;
         spawnCandy();
-
-        if (difficulty > 0.55 && Math.random() < 0.25) {
-            spawnCandy();
-        }
+        if (difficulty > 0.55 && Math.random() < 0.25) spawnCandy();
     }
 
-    const fallSpeed = 48 + difficulty * 48;
+    const speed = 48 + difficulty * 48;
 
     for (let i = items.length - 1; i >= 0; i--) {
         const item = items[i];
+        item.y += speed * (boosted ? 1.15 : 1) * dt;
 
-        item.y += fallSpeed * (boosted ? 1.15 : 1) * dt;
-
-        if (
-            item.y >= 200 &&
-            item.x + 10 >= player &&
-            item.x <= player + 24
-        ) {
-            if (item.powerup) {
-                boostTimer = 6;
-            } else if (item.poison) {
+        if (item.y >= 200 && item.x + 10 >= player && item.x <= player + 24) {
+            if (item.powerup) boostTimer = 6;
+            else if (item.poison) {
                 combo = 0;
                 misses++;
             } else {
                 combo++;
                 bestCombo = Math.max(bestCombo, combo);
                 score += boosted ? 2 : 1;
-
-                if (combo % 5 === 0) {
-                    score += 5;
-                }
+                if (combo % 5 === 0) score += 5;
             }
-
             items.splice(i, 1);
         } else if (item.y > 240) {
             if (!item.poison && !item.powerup) {
                 misses++;
                 combo = 0;
             }
-
             items.splice(i, 1);
         }
 
@@ -585,22 +423,16 @@ function update(dt) {
 
 function game(timestamp) {
     if (!lastFrame) lastFrame = timestamp;
-
     const dt = Math.min((timestamp - lastFrame) / 1000, 0.05);
     lastFrame = timestamp;
 
     update(dt);
-
-    if (started && !gameOver) {
-        updateLyrics();
-    }
-
+    if (started && !gameOver) updateLyrics();
     draw();
     requestAnimationFrame(game);
 }
 
 game();
 </script>
-
 </body>
 </html>
