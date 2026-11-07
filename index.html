@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Halloween Candy Catch</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+
     <style>
         * { box-sizing: border-box; }
 
@@ -16,7 +16,6 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            font-family: Arial, sans-serif;
         }
 
         .game-shell {
@@ -31,7 +30,6 @@
         canvas {
             display: block;
             width: 100%;
-            height: auto;
             image-rendering: pixelated;
             touch-action: none;
         }
@@ -54,6 +52,7 @@
         #lyrics.show { opacity: 1; }
     </style>
 </head>
+
 <body>
 
 <div class="game-shell">
@@ -139,17 +138,24 @@ const lyrics = [
 const GAME_LENGTH = 60;
 const MAX_MISSES = 20;
 
-let player = 68, score = 0, misses = 0;
-let combo = 0, bestCombo = 0;
-let items = [], keys = {};
-let started = false, gameOver = false, won = false;
-let elapsed = 0, spawnTimer = 0, boostTimer = 0;
-let currentLyric = -1, lastFrame = 0;
+let player = 68;
+let score = 0;
+let misses = 0;
+let items = [];
+let keys = {};
+let started = false;
+let gameOver = false;
+let elapsed = 0;
+let spawnTimer = 0;
+let boostTimer = 0;
+let currentLyric = -1;
+let lastFrame = 0;
 
 music.volume = 0.5;
 
 function startGame() {
     if (started || gameOver) return;
+
     started = true;
     music.currentTime = 0;
     music.play().catch(() => {});
@@ -157,34 +163,44 @@ function startGame() {
 
 function reset() {
     player = 68;
-    score = misses = combo = bestCombo = 0;
+    score = 0;
+    misses = 0;
     items = [];
-    elapsed = spawnTimer = boostTimer = 0;
+    elapsed = 0;
+    spawnTimer = 0;
+    boostTimer = 0;
     currentLyric = -1;
     started = false;
-    gameOver = won = false;
+    gameOver = false;
+
     lyricDisplay.textContent = "";
     lyricDisplay.classList.remove("show");
+
     music.pause();
     music.currentTime = 0;
     startGame();
 }
 
-function finishGame(completed) {
+function finishGame() {
     gameOver = true;
-    won = completed;
     music.pause();
     lyricDisplay.classList.remove("show");
 }
 
 window.onkeydown = e => {
     keys[e.key] = true;
-    if (e.key === " " || e.key.startsWith("Arrow")) e.preventDefault();
-    if (e.key === " " && !started && !gameOver) startGame();
-    else if (e.key === " " && gameOver) reset();
+
+    if (e.key === " " || e.key.startsWith("Arrow")) {
+        e.preventDefault();
+    }
+
+    if (e.key === " " && gameOver) reset();
+    else if (e.key === " " && !started) startGame();
 };
 
-window.onkeyup = e => keys[e.key] = false;
+window.onkeyup = e => {
+    keys[e.key] = false;
+};
 
 canvas.onclick = () => {
     if (gameOver) reset();
@@ -193,18 +209,17 @@ canvas.onclick = () => {
 
 canvas.onpointermove = e => {
     if (!started || gameOver) return;
-    const rect = canvas.getBoundingClientRect();
-    player = Math.max(0, Math.min(136, (e.clientX - rect.left) * 160 / rect.width - 12));
-};
 
-music.onended = () => {
-    if (!gameOver) finishGame(elapsed >= GAME_LENGTH);
+    const rect = canvas.getBoundingClientRect();
+    player = Math.max(0, Math.min(136,
+        (e.clientX - rect.left) * 160 / rect.width - 12
+    ));
 };
 
 function spawnCandy() {
-    const powerup = Math.random() < 0.035;
-    const poison = !powerup && Math.random() < 0.12;
-    const colors = ["#e98c86", "#e9ad67", "#91bba0"];
+    let powerup = Math.random() < 0.035;
+    let poison = !powerup && Math.random() < 0.12;
+    let colors = ["#e98c86", "#e9ad67", "#91bba0"];
 
     items.push({
         x: Math.random() * 148,
@@ -227,16 +242,17 @@ function updateLyrics() {
         currentLyric = index;
         lyricDisplay.textContent = index >= 0 ? lyrics[index][1] : "";
         lyricDisplay.classList.toggle("show", index >= 0);
+
         if (index >= 0) spawnCandy();
     }
 }
 
 function background() {
-    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
-    gradient.addColorStop(0, "#21172f");
-    gradient.addColorStop(1, "#765064");
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = "#39283e";
     ctx.fillRect(0, 0, 160, 240);
+
+    ctx.fillStyle = "#765064";
+    ctx.fillRect(0, 130, 160, 110);
 
     ctx.fillStyle = "#f3c58d";
     ctx.fillRect(124, 49, 14, 14);
@@ -251,18 +267,17 @@ function background() {
     ctx.fillRect(137, 165, 23, 15);
 
     ctx.fillStyle = "#e8d8e9";
-    [[14,48],[38,68],[70,42],[99,78],[19,112],[58,91],[146,96],[86,120],[132,132]].forEach(p => {
+
+    [[14,48],[38,68],[70,42],[99,78],[19,112],
+     [58,91],[146,96],[86,120],[132,132]].forEach(p => {
         ctx.fillRect(p[0], p[1], 2, 2);
     });
 }
 
 function drawPlayer() {
-    // Pumpkin stem
     ctx.fillStyle = "#526b43";
     ctx.fillRect(player + 10, 203, 5, 5);
-    ctx.fillRect(player + 11, 201, 3, 3);
 
-    // Pumpkin body
     ctx.fillStyle = "#b85b32";
     ctx.fillRect(player + 4, 207, 16, 13);
 
@@ -270,12 +285,10 @@ function drawPlayer() {
     ctx.fillRect(player + 2, 210, 20, 8);
     ctx.fillRect(player + 5, 206, 14, 15);
 
-    // Pumpkin sides and ridges
     ctx.fillStyle = "#f5a34f";
     ctx.fillRect(player + 8, 207, 2, 13);
     ctx.fillRect(player + 14, 207, 2, 13);
 
-    // Pumpkin face
     ctx.fillStyle = "#573044";
     ctx.fillRect(player + 7, 212, 3, 3);
     ctx.fillRect(player + 15, 212, 3, 3);
@@ -311,17 +324,11 @@ function drawHUD() {
 
     ctx.fillStyle = "#ffffff33";
     ctx.fillRect(7, 18, 146, 2);
+
     ctx.fillStyle = "#e9a477";
     ctx.fillRect(7, 18, 146 * elapsed / GAME_LENGTH, 2);
 
-    if (combo >= 2) {
-        ctx.textAlign = "left";
-        ctx.fillStyle = "#f4c78f";
-        ctx.fillText("COMBO x" + combo, 7, 31);
-    }
-
     if (boostTimer > 0) {
-        ctx.textAlign = "right";
         ctx.fillStyle = "#f6ce76";
         ctx.fillText("2X ACTIVE", 153, 31);
     }
@@ -341,9 +348,11 @@ function drawStartScreen() {
     ctx.font = "7px monospace";
     ctx.fillStyle = "#e9b4a4";
     ctx.fillText("A LITTLE HALLOWEEN GAME", 80, 118);
+
     ctx.fillStyle = "#f5e5d5";
     ctx.fillText("CLICK TO START", 80, 139);
     ctx.fillText("ARROWS / A-D TO MOVE", 80, 150);
+
     ctx.textAlign = "left";
 }
 
@@ -352,23 +361,22 @@ function drawGameOver() {
     ctx.fillRect(0, 0, 160, 240);
 
     ctx.textAlign = "center";
-    ctx.fillStyle = won ? "#f6ce76" : "#e99a91";
+    ctx.fillStyle = elapsed >= GAME_LENGTH ? "#f6ce76" : "#e99a91";
     ctx.font = "bold 14px monospace";
-    ctx.fillText(won ? "LEVEL CLEAR!" : "GAME OVER", 80, 84);
+    ctx.fillText(elapsed >= GAME_LENGTH ? "LEVEL CLEAR!" : "GAME OVER", 80, 84);
 
     ctx.fillStyle = "#f5e5d5";
     ctx.font = "8px monospace";
-    ctx.fillText("SCORE " + score, 80, 111);
-    ctx.fillText("BEST COMBO " + bestCombo, 80, 127);
-    ctx.fillText("MISSES " + misses, 80, 143);
-
-    ctx.fillStyle = "#e9b4a4";
+    ctx.fillText("SCORE " + score, 80, 115);
+    ctx.fillText("MISSES " + misses, 80, 132);
     ctx.fillText("CLICK TO PLAY AGAIN", 80, 174);
+
     ctx.textAlign = "left";
 }
 
 function draw() {
     background();
+
     items.forEach(drawItem);
     drawPlayer();
     drawHUD();
@@ -381,74 +389,70 @@ function update(dt) {
     if (!started || gameOver) return;
 
     elapsed += dt;
+
     if (elapsed >= GAME_LENGTH) {
         elapsed = GAME_LENGTH;
-        finishGame(true);
+        finishGame();
         return;
     }
 
-    const difficulty = elapsed / GAME_LENGTH;
-    const boosted = boostTimer > 0;
-    boostTimer = Math.max(0, boostTimer - dt);
-
     if (keys.ArrowLeft || keys.a || keys.A) player -= 150 * dt;
     if (keys.ArrowRight || keys.d || keys.D) player += 150 * dt;
+
     player = Math.max(0, Math.min(136, player));
 
-    const interval = Math.max(0.32, 0.95 - difficulty * 0.52 - (boosted ? 0.18 : 0));
+    boostTimer = Math.max(0, boostTimer - dt);
+
     spawnTimer += dt;
 
-    while (spawnTimer >= interval) {
-        spawnTimer -= interval;
+    let interval = Math.max(0.32, 0.95 - elapsed / GAME_LENGTH * 0.52);
+
+    if (spawnTimer >= interval) {
+        spawnTimer = 0;
         spawnCandy();
-        if (difficulty > 0.55 && Math.random() < 0.25) spawnCandy();
     }
 
-    const speed = 48 + difficulty * 48;
-
     for (let i = items.length - 1; i >= 0; i--) {
-        const item = items[i];
-        item.y += speed * (boosted ? 1.15 : 1) * dt;
+        let item = items[i];
+
+        item.y += 65 * dt * (boostTimer > 0 ? 1.15 : 1);
 
         if (item.y >= 200 && item.x + 10 >= player && item.x <= player + 24) {
-            if (item.powerup) boostTimer = 6;
-            else if (item.poison) {
-                combo = 0;
+            if (item.powerup) {
+                boostTimer = 6;
+            } else if (item.poison) {
                 misses++;
             } else {
-                combo++;
-                bestCombo = Math.max(bestCombo, combo);
-                score += boosted ? 2 : 1;
-                if (combo % 5 === 0) score += 5;
+                score += boostTimer > 0 ? 2 : 1;
             }
+
             items.splice(i, 1);
         } else if (item.y > 240) {
-            if (!item.poison && !item.powerup) {
-                misses++;
-                combo = 0;
-            }
+            if (!item.poison && !item.powerup) misses++;
             items.splice(i, 1);
         }
 
         if (misses >= MAX_MISSES) {
-            finishGame(false);
+            finishGame();
             break;
         }
     }
 }
 
 function game(timestamp) {
-    if (!lastFrame) lastFrame = timestamp;
-    const dt = Math.min((timestamp - lastFrame) / 1000, 0.05);
+    let dt = Math.min((timestamp - lastFrame) / 1000, 0.05);
     lastFrame = timestamp;
 
     update(dt);
+
     if (started && !gameOver) updateLyrics();
+
     draw();
     requestAnimationFrame(game);
 }
 
 game();
 </script>
+
 </body>
 </html>
