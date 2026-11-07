@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,53 +25,6 @@
         .game-shell {
             width: min(100%, 420px);
             padding: 10px;
-        }
-
-        .audio-bar {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            padding: 0 4px 9px;
-        }
-
-        .audio-bar button {
-            width: 29px;
-            height: 29px;
-            flex-shrink: 0;
-            border: 1px solid #574365;
-            border-radius: 0;
-            background: #30223d;
-            color: #f5d5ad;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .audio-bar input {
-            width: min(95px, 25vw);
-            height: 4px;
-            appearance: none;
-            border-radius: 10px;
-            background: #594768;
-            cursor: pointer;
-        }
-
-        .audio-bar input::-webkit-slider-thumb {
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #f1c69b;
-            border: 2px solid #30223d;
-        }
-
-        .audio-bar input::-moz-range-thumb {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #f1c69b;
-            border: 2px solid #30223d;
         }
 
         .game-wrap {
@@ -117,11 +71,6 @@
 <body>
 
 <div class="game-shell">
-    <div class="audio-bar">
-        <button id="muteBtn">♫</button>
-        <input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.5">
-    </div>
-
     <div class="game-wrap">
         <canvas id="game" width="160" height="240"></canvas>
         <div id="lyrics"></div>
@@ -137,8 +86,6 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const music = document.getElementById("music");
 const lyricDisplay = document.getElementById("lyrics");
-const volumeSlider = document.getElementById("volumeSlider");
-const muteBtn = document.getElementById("muteBtn");
 
 const lyrics = [
     { time: 4.86, text: "I think I died again" },
@@ -223,17 +170,6 @@ const GAME_LENGTH = 60;
 const MAX_MISSES = 20;
 
 music.volume = 0.5;
-
-volumeSlider.addEventListener("input", function() {
-    music.volume = Number(this.value);
-    music.muted = false;
-    muteBtn.textContent = music.volume === 0 ? "×" : "♫";
-});
-
-muteBtn.addEventListener("click", function() {
-    music.muted = !music.muted;
-    this.textContent = music.muted ? "×" : "♫";
-});
 
 window.onkeydown = function(e) {
     keys[e.key] = true;
