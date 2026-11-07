@@ -452,7 +452,7 @@ function background() {
     ctx.fillRect(75, 225, 2, 2);
 
     if (flash > 0) {
-        ctx.fillStyle = "rgba(255, 221, 190," + flash * 0.16 + ")";
+        ctx.fillStyle = "rgba(255, 221, 190," + flash * 0.07 + ")";
         ctx.fillRect(0, 0, 160, 240);
     }
 }
@@ -610,7 +610,7 @@ function update(dt) {
     const boosted = boostTimer > 0;
 
     boostTimer = Math.max(0, boostTimer - dt);
-    flash = Math.max(0, flash - dt * 2.5);
+    flash = Math.max(0, flash - dt * 4);
 
     const moveSpeed = 150;
 
