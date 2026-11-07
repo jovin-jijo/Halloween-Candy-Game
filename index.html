@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Halloween Candy Catch</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #0f0a1c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-wrap {
+            position: relative;
+            width: min(100vw, 66.6667vh);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            image-rendering: pixelated;
+            border: 2px solid #332044;
+        }
+
+        #lyrics {
+            position: absolute;
+            bottom: 20%;
+            left: 5%;
+            width: 90%;
+            text-align: center;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: clamp(12px, 3vw, 19px);
+            font-weight: 600;
+            line-height: 1.4;
+            text-shadow: 0 0 5px rgba(255,255,255,0.8),
+                         0 0 12px rgba(255,180,220,0.6);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        #lyrics.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-wrap">
+    <canvas id="game" width="160" height="240"></canvas>
+    <div id="lyrics"></div>
+</div>
+
+<audio id="music">
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const music = document.getElementById("music");
+const lyricDisplay = document.getElementById("lyrics");
+
+const lyrics = [
+    { time: 0, text: "I think I died again" },
+    { time: 4, text: "So we could stay as friends, yeah" },
+    { time: 8, text: "I think it all depends" },
+    { time: 11, text: "On the truth" },
+    { time: 14, text: "I know your friends just hate me" },
+    { time: 18, text: "They acting kind of crazy" },
+    { time: 22, text: "They always laugh and gate-keep" },
+    { time: 26, text: "But it's cool" },
+    { time: 30, text: "People, they always quick to judge" },
+    { time: 34, text: "We know, I'm never leaving ya" },
+    { time: 38, text: "Bedroom is a haven" },
+    { time: 42, text: "We put on our favorite song" },
+    { time: 46, text: "Details, the ones I'll never know" },
+    { time: 50, text: "She sells the things I'm letting go" },
+    { time: 54, text: "But, way to push my luck" },
+    { time: 58, text: "I've been alive when you talk like you do" },
+    { time: 63, text: "Your hearts grown weak" },
+    { time: 67, text: "Enough to keep me your dirty little secret" },
+    { time: 72, text: "When you last saw me, baby I couldn't speak" },
+    { time: 77, text: "Oh, you'd never really mean that" },
+    { time: 82, text: "One, two, three, four" },
+    { time: 87, text: "Oh, when you're far from me" },
+    { time: 91, text: "It becomes so easy to figure it out" },
+    { time: 96, text: "So, fine" },
+    { time: 100, text: "I know your waiting for" },
+    { time: 104, text: "I don't wanna fall" },
+    { time: 108, text: "Oh baby you're the one for me" },
+    { time: 113, text: "I could cry" },
+    { time: 117, text: "Every time I'm asking why" },
+    { time: 121, text: "You've been always by my side" },
+    { time: 125, text: "Again, again" },
+    { time: 129, text: "Too in love to be just friends 'cause" },
+    { time: 134, text: "I won't lie" },
+    { time: 138, text: "You've been always on my mind" },
+    { time: 142, text: "You've been always by my side" },
+    { time: 146, text: "Again, again" },
+    { time: 150, text: "Too in love to be just friends 'cause" },
+    { time: 155, text: "Yeah my hearts got weak I know" },
+    { time: 159, text: "Saying I should let things go" },
+    { time: 163, text: "But my time" },
+    { time: 167, text: "Got me crying" },
+    { time: 171, text: "I could cry" },
+    { time: 175, text: "Every time I'm asking why" },
+    { time: 179, text: "You've been always by my side" },
+    { time: 183, text: "Again, again" },
+    { time: 187, text: "Too in love to be just friends 'cause" },
+    { time: 191, text: "I won't lie" },
+    { time: 195, text: "You've been always on my mind" },
+    { time: 199, text: "You've been always by my side" },
+    { time: 203, text: "Again, again" },
+    { time: 207, text: "Too in love to be just friends 'cause" }
+];
+
+let player = 68;
+let score = 0;
+let misses = 0;
+let items = [];
+let gameOver = false;
+let keys = {};
+let started = false;
+let currentLyric = -1;
+
+window.onkeydown = function(e) {
+    keys[e.key] = true;
+
+    if (e.key === " " && !started && !gameOver) {
+        startGame();
+    } else if (gameOver && e.key === " ") {
+        reset();
+    }
+};
+
+window.onkeyup = function(e) {
+    keys[e.key] = false;
+};
+
+function startGame() {
+    if (started) return;
+
+    started = true;
+
+    music.play().catch(() => {
+        started = false;
+    });
+}
+
+function reset() {
+    player = 68;
+    score = 0;
+    misses = 0;
+    items = [];
+    gameOver = false;
+    started = false;
+    currentLyric = -1;
+
+    lyricDisplay.textContent = "";
+    lyricDisplay.classList.remove("show");
+
+    music.pause();
+    music.currentTime = 0;
+
+    startGame();
+}
+
+canvas.onclick = function() {
+    if (gameOver) {
+        reset();
+    } else if (!started) {
+        startGame();
+    }
+};
+
+music.onended = function() {
+    gameOver = true;
+    lyricDisplay.classList.remove("show");
+};
+
+function updateLyrics() {
+    let index = -1;
+
+    for (let i = 0; i < lyrics.length; i++) {
+        if (music.currentTime >= lyrics[i].time) {
+            index = i;
+        } else {
+            break;
+        }
+    }
+
+    if (index !== currentLyric) {
+        currentLyric = index;
+
+        if (index >= 0) {
+            lyricDisplay.classList.remove("show");
+            lyricDisplay.textContent = lyrics[index].text;
+
+            requestAnimationFrame(() => {
+                lyricDisplay.classList.add("show");
+            });
+        } else {
+            lyricDisplay.classList.remove("show");
+        }
+    }
+}
+
+function background() {
+    let g = ctx.createLinearGradient(0, 0, 0, 240);
+    g.addColorStop(0, "#1a0933");
+    g.addColorStop(1, "#781c4e");
+
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 160, 240);
+
+    ctx.fillStyle = "#ffa927";
+    ctx.fillRect(125, 25, 14, 14);
+
+    ctx.fillStyle = "white";
+
+    let stars = [[15,20], [40,60], [75,15], [100,50], [25,100]];
+
+    for (let star of stars) {
+        ctx.fillRect(star[0], star[1], 1, 1);
+    }
+
+    ctx.fillStyle = "#08030f";
+    ctx.fillRect(0, 200, 160, 40);
+    ctx.fillRect(15, 165, 30, 35);
+    ctx.fillRect(20, 145, 20, 20);
+    ctx.fillRect(85, 192, 6, 8);
+    ctx.fillRect(125, 190, 7, 10);
+}
+
+function drawPlayer() {
+    ctx.fillStyle = "#e65c00";
+    ctx.fillRect(player + 2, 210, 20, 10);
+
+    ctx.fillStyle = "#ff7700";
+    ctx.fillRect(player + 4, 211, 16, 8);
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(player + 6, 213, 3, 2);
+    ctx.fillRect(player + 15, 213, 3, 2);
+    ctx.fillRect(player + 8, 217, 8, 2);
+
+    ctx.fillStyle = "#3a1e05";
+    ctx.fillRect(player + 11, 207, 2, 3);
+}
+
+function drawItem(item) {
+    ctx.fillStyle = item.color;
+    ctx.fillRect(item.x + 2, item.y + 2, 4, 4);
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(item.x, item.y + 3, 2, 2);
+    ctx.fillRect(item.x + 6, item.y + 3, 2, 2);
+}
+
+function update() {
+    if (gameOver || !started) return;
+
+    if (keys["ArrowLeft"] || keys["a"]) player -= 3;
+    if (keys["ArrowRight"] || keys["d"]) player += 3;
+
+    if (player < 0) player = 0;
+    if (player > 136) player = 136;
+
+    if (Math.random() < 0.035) {
+        let poison = Math.random() < 0.08;
+
+        items.push({
+            x: Math.random() * 152,
+            y: -8,
+            color: poison ? "#9922ee" :
+                ["#ff2255", "#ffaa00", "#00cc55"][
+                    Math.floor(Math.random() * 3)
+                ],
+            poison: poison
+        });
+    }
+
+    for (let i = items.length - 1; i >= 0; i--) {
+        let item = items[i];
+
+        item.y += 1.0;
+
+        if (
+            item.y >= 200 &&
+            item.x + 8 >= player &&
+            item.x <= player + 24
+        ) {
+            if (!item.poison) {
+                score++;
+            }
+
+            items.splice(i, 1);
+        } else if (item.y > 240) {
+            if (!item.poison) misses++;
+            items.splice(i, 1);
+        }
+    }
+}
+
+function draw() {
+    background();
+
+    for (let item of items) {
+        drawItem(item);
+    }
+
+    drawPlayer();
+
+    ctx.fillStyle = "white";
+    ctx.font = "9px monospace";
+    ctx.fillText("SCORE: " + score, 4, 12);
+    ctx.fillText("MISSES: " + misses, 100, 12);
+
+    if (!started && !gameOver) {
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.fillText("CLICK TO START", 80, 120);
+        ctx.textAlign = "left";
+    }
+
+    if (gameOver) {
+        ctx.fillStyle = "rgba(8,3,15,0.85)";
+        ctx.fillRect(0, 0, 160, 240);
+
+        ctx.fillStyle = "#ff2255";
+        ctx.font = "bold 14px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", 80, 100);
+
+        ctx.fillStyle = "white";
+        ctx.font = "9px monospace";
+        ctx.fillText("Score: " + score, 80, 125);
+        ctx.fillText("SPACE TO RESTART", 80, 150);
+
+        ctx.textAlign = "left";
+    }
+}
+
+function game() {
+    update();
+
+    if (started && !gameOver) {
+        updateLyrics();
+    }
+
+    draw();
+    requestAnimationFrame(game);
+}
+
+game();
+</script>
+
+</body>
+</html>
